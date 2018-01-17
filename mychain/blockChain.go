@@ -6,7 +6,7 @@ import (
 
 type BlockChain interface {
 	AddBlock(block Block)
-	Validate() bool
+	Verify() bool
 }
 
 type MyChain struct {
@@ -33,10 +33,23 @@ func genesisBlock() *MyBlock {
 }
 
 func (c *MyChain) AddBlock(block Block) {
+	// TODO block needs to get hash of last block in chain..
 	b := block.Mine(c.difficulty)
 	c.chain = append(c.chain, b)
 }
 
-func (m *MyChain) Validate() bool {
+func (m *MyChain) Verify() bool {
+	for i := 1; i < len(m.chain); i++ {
+		currBlock := m.chain[i]
+		prevBlock := m.chain[i-1]
+
+		if currBlock.GetHash() != currBlock.ComputeHash() {
+			return false
+		}
+		if currBlock.GetPreviousHash() != prevBlock.ComputeHash() {
+			return false
+		}
+	}
+
 	return true
 }

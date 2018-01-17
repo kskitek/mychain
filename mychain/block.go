@@ -3,12 +3,15 @@ package mychain
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"time"
 )
 
 type Block interface {
 	ComputeHash() string
 	Mine(difficulty int) Block
+	GetHash() string
+	GetPreviousHash() string
 }
 
 type MyBlock struct {
@@ -17,6 +20,25 @@ type MyBlock struct {
 	Hash         string
 	PreviousHash string
 	nonce        int64
+}
+
+func NewMyBlock(timestamp time.Time, data []byte) *MyBlock {
+	b := &MyBlock{
+		Timestamp: timestamp,
+		Data:      data,
+	}
+
+	b.Hash = b.ComputeHash()
+
+	return b
+}
+
+func (b *MyBlock) GetHash() string {
+	return b.Hash
+}
+
+func (b *MyBlock) GetPreviousHash() string {
+	return b.PreviousHash
 }
 
 func (b *MyBlock) ComputeHash() string {
@@ -37,6 +59,8 @@ func (b *MyBlock) ComputeHash() string {
 }
 
 func (b *MyBlock) Mine(difficutly int) Block {
+	fmt.Printf("Mining %v\n", b)
+	fmt.Printf("Mining %v\n", b.Hash)
 	// TODO difficulty
 	expected := "000"
 	for b.Hash[:difficutly] == expected {
