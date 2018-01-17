@@ -1,0 +1,25 @@
+image: golang:latest
+
+variables:
+  REPO_NAME: kskitek/mychain
+
+before_script:
+  - mkdir -p $GOPATH/src/$REPO_NAME
+  - ln -svf $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+
+stages:
+    - test
+    - build
+
+test:
+    stage: test
+    script:
+      - go fmt ./...
+      - go vet ./...
+      - go test -race ./...
+
+compile:
+    stage: build
+    script:
+      - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mychain
