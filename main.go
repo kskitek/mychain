@@ -9,10 +9,7 @@ import (
 func main() {
 	bc := mychain.NewMyChain()
 
-	b1 := &mychain.MyBlock{
-		Data:      []byte("test"),
-		Timestamp: time.Now(),
-	}
+	b1 := mychain.NewMyBlock(time.Now(), []byte("test"))
 
 	bc.AddBlock(b1)
 	fmt.Println(bc.Verify())
