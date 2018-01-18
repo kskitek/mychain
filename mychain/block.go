@@ -45,7 +45,7 @@ func (b *Block) Mine(difficutly int) {
 	}
 }
 
-func bytesFromBlock(block *Block) []byte {
+func bytesFromBlock(b *Block) []byte {
 	buff := &bytes.Buffer{}
 
 	t, _ := b.Timestamp.MarshalBinary()
