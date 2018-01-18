@@ -28,6 +28,24 @@ func NewBlock(timestamp time.Time, data []byte) *Block {
 }
 
 func (b *Block) ComputeHash() string {
+	blockBytes := bytesFromBlock(b)
+
+	h := sha256.New()
+	h.Write(blockBytes)
+
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (b *Block) Mine(difficutly int) {
+	// TODO difficulty
+	expected := "000"
+	for b.hash[:difficutly] != expected {
+		b.nonce++
+		b.hash = b.ComputeHash()
+	}
+}
+
+func bytesFromBlock(block *Block) []byte {
 	buff := &bytes.Buffer{}
 
 	t, _ := b.Timestamp.MarshalBinary()
@@ -41,18 +59,5 @@ func (b *Block) ComputeHash() string {
 	binary.BigEndian.PutUint64(nonce, uint64(b.nonce))
 	buff.Write(nonce)
 
-	// return buff.String()
-	h := sha256.New()
-	h.Write(buff.Bytes())
-
-	return hex.EncodeToString(h.Sum(nil))
-}
-
-func (b *Block) Mine(difficutly int) {
-	// TODO difficulty
-	expected := "000"
-	for b.hash[:difficutly] != expected {
-		b.nonce++
-		b.hash = b.ComputeHash()
-	}
+	return buff.Bytes()
 }
