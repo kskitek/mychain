@@ -5,37 +5,37 @@ import (
 )
 
 type BlockChain interface {
-	AddBlock(block Block)
+	AddBlock(block *Block)
 	Verify() bool
 }
 
 type MyChain struct {
-	chain      []Block
+	chain      []*Block
 	difficulty int
 }
 
 func NewMyChain() BlockChain {
 	return &MyChain{
-		chain:      []Block{genesisBlock()},
+		chain:      []*Block{genesisBlock()},
 		difficulty: 3,
 	}
 }
 
-func genesisBlock() *MyBlock {
-	b := &MyBlock{
+func genesisBlock() *Block {
+	b := &Block{
 		Timestamp:    time.Now(),
 		Data:         make([]byte, 0),
-		PreviousHash: "empty",
+		previousHash: "000empty",
 	}
-	b.Hash = b.ComputeHash()
+	b.hash = b.ComputeHash()
 
 	return b
 }
 
-func (c *MyChain) AddBlock(block Block) {
-	// TODO block needs to get hash of last block in chain..
-	b := block.Mine(c.difficulty)
-	c.chain = append(c.chain, b)
+func (c *MyChain) AddBlock(block *Block) {
+	block.previousHash = c.chain[len(c.chain)-1].hash
+	block.Mine(c.difficulty)
+	c.chain = append(c.chain, block)
 }
 
 func (m *MyChain) Verify() bool {
@@ -43,10 +43,10 @@ func (m *MyChain) Verify() bool {
 		currBlock := m.chain[i]
 		prevBlock := m.chain[i-1]
 
-		if currBlock.GetHash() != currBlock.ComputeHash() {
+		if currBlock.hash != currBlock.ComputeHash() {
 			return false
 		}
-		if currBlock.GetPreviousHash() != prevBlock.ComputeHash() {
+		if currBlock.previousHash != prevBlock.ComputeHash() {
 			return false
 		}
 	}

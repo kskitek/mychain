@@ -2,46 +2,32 @@ package mychain
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
-	"fmt"
+	"encoding/hex"
 	"time"
 )
 
-type Block interface {
-	ComputeHash() string
-	Mine(difficulty int) Block
-	GetHash() string
-	GetPreviousHash() string
-}
-
-type MyBlock struct {
+type Block struct {
 	Timestamp    time.Time
 	Data         []byte
-	Hash         string
-	PreviousHash string
+	hash         string
+	previousHash string
 	nonce        int64
 }
 
-func NewMyBlock(timestamp time.Time, data []byte) *MyBlock {
-	b := &MyBlock{
+func NewBlock(timestamp time.Time, data []byte) *Block {
+	b := &Block{
 		Timestamp: timestamp,
 		Data:      data,
 	}
 
-	b.Hash = b.ComputeHash()
+	b.hash = b.ComputeHash()
 
 	return b
 }
 
-func (b *MyBlock) GetHash() string {
-	return b.Hash
-}
-
-func (b *MyBlock) GetPreviousHash() string {
-	return b.PreviousHash
-}
-
-func (b *MyBlock) ComputeHash() string {
+func (b *Block) ComputeHash() string {
 	buff := &bytes.Buffer{}
 
 	t, _ := b.Timestamp.MarshalBinary()
@@ -49,24 +35,24 @@ func (b *MyBlock) ComputeHash() string {
 
 	buff.Write(b.Data)
 
-	buff.Write([]byte(b.PreviousHash))
+	buff.Write([]byte(b.previousHash))
 
 	nonce := make([]byte, 8)
 	binary.BigEndian.PutUint64(nonce, uint64(b.nonce))
 	buff.Write(nonce)
 
-	return buff.String()
+	// return buff.String()
+	h := sha256.New()
+	h.Write(buff.Bytes())
+
+	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (b *MyBlock) Mine(difficutly int) Block {
-	fmt.Printf("Mining %v\n", b)
-	fmt.Printf("Mining %v\n", b.Hash)
+func (b *Block) Mine(difficutly int) {
 	// TODO difficulty
 	expected := "000"
-	for b.Hash[:difficutly] == expected {
+	for b.hash[:difficutly] != expected {
 		b.nonce++
-		b.Hash = b.ComputeHash()
+		b.hash = b.ComputeHash()
 	}
-
-	return b
 }
